@@ -5,6 +5,6 @@ const conversationSchema = new Schema({
         type: Array,
         required: true
     }
-}, {timestamps:tue})
+}, {timestamps:true})
 
 export const Conversation = mongoose.model('Conversation', conversationSchema)
