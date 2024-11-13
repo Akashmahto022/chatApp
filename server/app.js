@@ -2,7 +2,7 @@ import express from "express";
 import dbConnection from "./db/index.js";
 import { User } from "./models/User.model.js";
 import bcryptjs from "bcryptjs";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
 const app = express();
 const port = 4000;
@@ -81,27 +81,39 @@ app.post("/api/login", async (req, res, next) => {
             status: 400,
             message: "Password not matched",
           });
-        }
-        else{
-            const payload={
-                userId: user._id,
-                email: user.email
+        } else {
+          const payload = {
+            userId: user._id,
+            email: user.email,
+          };
+          const JWT_SECRET_KEY =
+            process.env.JWT_SECRET_KEY ||
+            "THISKJCKACBmnvbjNBD_JWT_SECRET_KEYncjkxcNCKDBCK";
+          jwt.sign(
+            payload,
+            JWT_SECRET_KEY,
+            { expiresIn: 84600 },
+            async (err, token) => {
+              await User.updateOne(
+                { _id: user._id },
+                {
+                  $set: { token },
+                }
+              );
+              user.save();
+              next();
             }
-            const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "THISKJCKACBmnvbjNBD_JWT_SECRET_KEYncjkxcNCKDBCK"
-            jwt.sign(payload, JWT_SECRET_KEY, {expiresIn: 84600}, async(err, token)=>{
-                await User.updateOne({_id: user._id}, {
-                    $set: {token}
-                })
-                user.save();
-                next()
-            })
+          );
 
-            res.json({
-                status: 200,
-                user:{email: user.email, fullName: user.fullName, token:user.token}
-            })
+          res.json({
+            status: 200,
+            user: {
+              email: user.email,
+              fullName: user.fullName,
+              token: user.token,
+            },
+          });
         }
-
       }
     }
   } catch (error) {
