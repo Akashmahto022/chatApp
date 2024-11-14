@@ -182,9 +182,39 @@ app.get("/api/conversation/:userId", async (req, res) => {
 
 app.post("/api/message", async (req, res) => {
   try {
-    const { conversationId, senderId, message } = req.body;
+    const { conversationId, senderId, message, receiverId } = req.body;
+    if (!senderId || !message) {
+      res.json({
+        status: 200,
+        message: "Please enter message and senderId",
+      });
+    }
+    if (!conversationId) {
+      const newConversation = new Conversation({
+        members: [senderId, receiverId],
+      });
 
-    const newMessage = new Messages({ conversationId, senderId, message });
+      await newConversation.save();
+      const newMessage = new Messages({
+        conversationId,
+        senderId,
+        message,
+        receiverId,
+      });
+      await newMessage.save();
+
+      res.json({
+        status: 200,
+        message: "conversation created successfully",
+      });
+    }
+
+    const newMessage = new Messages({
+      conversationId,
+      senderId,
+      message,
+      receiverId,
+    });
     await newMessage.save();
     res.json({
       status: 200,
@@ -202,6 +232,12 @@ app.post("/api/message", async (req, res) => {
 app.get("/api/message/:conversationId", async (req, res) => {
   try {
     const conversationId = req.params.conversationId;
+    if (!conversationId) {
+      res.json({
+        status: 200,
+        message: "you don't have convesation id",
+      });
+    }
     const messages = await Messages.find({ conversationId });
     console.log(messages);
     const messageUserData = await Promise.all(
@@ -223,19 +259,18 @@ app.get("/api/message/:conversationId", async (req, res) => {
       getingMessage: messageUserData,
     });
   } catch (error) {
-    res.json({status: 400, message: "error while getting the messages"})
-    
+    res.json({ status: 400, message: "error while getting the messages" });
   }
 });
 
 app.get("/api/getalluser", async (req, res) => {
   try {
-    const users =await User.find();
+    const users = await User.find();
     res.json({ status: 200, message: "getting all users", users: users });
+  } catch (error) {
+    res.json({ status: 400, message: "error while getting the user" });
   }
-  catch (error) {
-    res.json({status: 400, message: "error while getting the user"})
-  }})
+});
 
 app.listen(port, () => {
   console.log(`server is running at http://localhost:${port}`);
