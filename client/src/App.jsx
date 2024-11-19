@@ -5,16 +5,15 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import { Route, Routes, Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = localStorage.getItem("user:token") !== null || true
-  // const isLoggedIn = true;
-
-  if (!isLoggedIn) {
-    return <Navigate to={"/login"} />;  
+  const isLoggedIn = localStorage.getItem("user:token")
+  if (!isLoggedIn  && ['/'].includes(window.location.pathname)) {
+    return <Navigate to={"/signup"} />;  
   } else if (isLoggedIn && ['/login', '/signup'].includes(window.location.pathname)){
     return <Navigate to={"/"} />;
   }
   return children;
 };
+
 
 const App = () => {
   return (
