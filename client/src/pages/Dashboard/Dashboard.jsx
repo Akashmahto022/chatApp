@@ -40,6 +40,7 @@ const Dashboard = () => {
 
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
   const [conversations, setConversations] = useState([]);
+  const [message, setMessages] = useState([])
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -62,6 +63,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`http://localhost:4000/api/conversations/${conversationId}`)
       console.log(response.data)
+      setMessages(response.data)
     } catch (error) {
       console.log('error while fetch the user messages', error)
     }
