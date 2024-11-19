@@ -24,7 +24,7 @@ const Login = () => {
       const response = await axios.post("http://localhost:4000/api/login", data)
       console.log(response)
       if (response.data) {
-        localStorage.setItem("user", response.data.user)
+        localStorage.setItem("user", JSON.stringify(response.data.user))
         navigate('/')
       }
     } catch (error) {

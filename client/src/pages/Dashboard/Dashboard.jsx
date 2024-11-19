@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Avatar from "../../assets/ganesh.png";
 import Input from "../../components/Input/Input";
+import axios from "axios";
 
 const Dashboard = () => {
   const contacts = [
@@ -37,6 +38,27 @@ const Dashboard = () => {
     },
   ];
 
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const [conversations, setConversations] = useState([]);
+
+  useEffect(() => {
+    const fetchConversation = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:4000/api/conversations/${user.id}`
+        );
+        setConversations(response.data.
+          conversationUserData
+          );
+      } catch (error) {
+        console.log("error while fetch the conversations", error);
+      }
+    };
+
+    fetchConversation();
+  }, []);
+  console.log(conversations);
+
   return (
     <div className="w-screen flex ">
       <div className="w-[25%] bg-white h-screen bg-secondary">
@@ -50,7 +72,7 @@ const Dashboard = () => {
             />
           </div>
           <div className="ml-8">
-            <h3 className="text-2xl">Akash</h3>
+            <h3 className="text-2xl">{user.fullName}</h3>
             <p className="text-lg font-light">My Account</p>
           </div>
         </div>
@@ -58,7 +80,8 @@ const Dashboard = () => {
         <div className="ml-6">
           <div>Message</div>
           <div>
-            {contacts.map((user, index) => (
+            {conversations.map(({user}, index) => (
+
               <div key={index} className="flex items-center my-8">
                 <div className="border border-blue-800 p-2 rounded-[50%]">
                   <img
@@ -69,8 +92,8 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className="ml-2">
-                  <h3 className="text-lg">{user.name}</h3>
-                  <p className="text-base font-light">{user.status}</p>
+                  <h3 className="text-lg">{user.fullName}</h3>
+                  <p className="text-base font-light">{user.email}</p>
                 </div>
               </div>
             ))}
@@ -88,7 +111,7 @@ const Dashboard = () => {
             />
           </div>
           <div className="ml-8 mr-[300px]">
-            <h3 className="text-lg">Akash</h3>
+            <h3 className="text-lg">{user.fullName}</h3>
             <p className="text-base font-light">Online</p>
           </div>
           <div>
@@ -131,7 +154,6 @@ const Dashboard = () => {
               inventore!
             </div>
             <div className="w-[300px] bg-blue-600 rounded-b-xl rounded-tl-xl ml-auto p-4 text-white">
-              
               Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae,
               consectetur distinctio libero assumenda sint iste. A autem sit
               facilis voluptatum!
@@ -154,7 +176,6 @@ const Dashboard = () => {
               inventore!
             </div>
             <div className="w-[300px] bg-blue-600 rounded-b-xl rounded-tl-xl ml-auto p-4 text-white">
-              
               Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae,
               consectetur distinctio libero assumenda sint iste. A autem sit
               facilis voluptatum!
@@ -177,17 +198,22 @@ const Dashboard = () => {
               inventore!
             </div>
             <div className="w-[300px] bg-blue-600 rounded-b-xl rounded-tl-xl ml-auto p-4 text-white">
-              
               Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae,
               consectetur distinctio libero assumenda sint iste. A autem sit
               facilis voluptatum!
             </div>
           </div>
         </div>
-      <div className="flex justify-between gap-5 p-14 w-full">
-        <input type="text" placeholder="Type Your Message here..." className="w-full p-2 rounded-lg border-orange-600"/>
-        <button className="p-4 bg-green-600 text-white font-semibold rounded-md">Send</button>
-      </div>
+        <div className="flex justify-between gap-5 p-14 w-full">
+          <input
+            type="text"
+            placeholder="Type Your Message here..."
+            className="w-full p-2 rounded-lg border-orange-600"
+          />
+          <button className="p-4 bg-green-600 text-white font-semibold rounded-md">
+            Send
+          </button>
+        </div>
       </div>
       <div className="w-[25%]  h-screen"></div>
     </div>
