@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Input from "../../components/Input/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [data, setData] = useState({
@@ -8,16 +9,27 @@ const Login = () => {
     password: "",
   });
 
-  console.log(data);
+  const navigate = useNavigate()
+
   const handleChange = (e) => {
     setData((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    try {
     console.log(data);
+      const response = await axios.post("http://localhost:4000/api/login", data)
+      console.log(response)
+      if (response.data) {
+        localStorage.setItem("user", response.data.user)
+        navigate('/')
+      }
+    } catch (error) {
+      console.log("Error while login the user")
+    }
   };
   return (
     <div className="h-screen flex justify-center items-center">
@@ -32,7 +44,7 @@ const Login = () => {
             onChange={handleChange}
           />
           <Input
-            type="email"
+            type="password"
             label="Password"
             name="password"
             placeholder="Enter Your Password"
@@ -46,7 +58,7 @@ const Login = () => {
         <p>
           if don't have an account go to
           <Link to={'/signup'}>
-          <span className="underline text-blue-700">Signup</span>
+          <span className="underline text-blue-700"> Signup</span>
           </Link>
         </p>
       </div>

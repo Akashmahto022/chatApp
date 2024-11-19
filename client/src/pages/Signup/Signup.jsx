@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Input from "../../components/Input/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios'
 
 const Signup = () => {
   const [data, setData] = useState({
@@ -8,17 +9,26 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const navigate = useNavigate()
 
-  console.log(data);
   const handleChange = (e) => {
     setData((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(data);
+    try {
+      const response = await axios.post("http://localhost:4000/api/signup", data)
+      console.log(response)
+      setData("")
+      navigate('/login')
+
+    } catch (error) {
+      console.log("Error while register the user")
+    }
+
   };
 
   return (

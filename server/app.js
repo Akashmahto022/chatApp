@@ -3,6 +3,7 @@ import dbConnection from "./db/index.js";
 import { User } from "./models/User.model.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cors from 'cors'
 import { Conversation } from "./models/Conversation.model.js";
 import { Messages } from "./models/Messages.model.js";
 
@@ -11,6 +12,7 @@ const port = 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors())
 dbConnection();
 
 // Routes
