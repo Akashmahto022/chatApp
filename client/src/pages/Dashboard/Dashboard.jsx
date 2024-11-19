@@ -57,7 +57,15 @@ const Dashboard = () => {
 
     fetchConversation();
   }, []);
-  console.log(conversations);
+
+  const fetchMessages= async(conversationId)=>{
+    try {
+      const response = await axios.get(`http://localhost:4000/api/conversations/${conversationId}`)
+      console.log(response.data)
+    } catch (error) {
+      console.log('error while fetch the user messages', error)
+    }
+  }
 
   return (
     <div className="w-screen flex ">
@@ -76,13 +84,14 @@ const Dashboard = () => {
             <p className="text-lg font-light">My Account</p>
           </div>
         </div>
-        <hr />
+        <hr />  
         <div className="ml-6">
           <div>Message</div>
           <div>
-            {conversations.map(({user}, index) => (
+            { conversations.length > 0 ?
+            conversations.map(({user, conversationId}, index) => (
 
-              <div key={index} className="flex items-center my-8">
+              <div key={index} className="flex items-center my-8 hover:bg-slate-200 hover:rounded-md p-2 cursor-pointer" onClick={()=>fetchMessages(conversationId)}>
                 <div className="border border-blue-800 p-2 rounded-[50%]">
                   <img
                     src={user.img}
@@ -95,8 +104,9 @@ const Dashboard = () => {
                   <h3 className="text-lg">{user.fullName}</h3>
                   <p className="text-base font-light">{user.email}</p>
                 </div>
+                <hr />
               </div>
-            ))}
+            )) : <div className="text-center text-lg font-semibold pt-4">No Conversations yet</div>}
           </div>
         </div>
       </div>
