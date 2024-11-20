@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [conversationUser, setConversationUser] = useState([]);
   const [activeUser, setActiveUser] = useState(false);
   const [messageconversationId, setMessageConversationId] = useState("")
+  const [allUser, setAlluser] = useState([])
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -17,12 +18,23 @@ const Dashboard = () => {
         const response = await axios.get(
           `http://localhost:4000/api/conversations/${user.id}`
         );
-        console.log(response)
         setConversations(response.data.conversationUserData);
       } catch (error) {
         console.log("error while fetch the conversations", error);
       }
     };
+    const getAllUser = async()=>{
+      try {
+        const response = await axios.get("http://localhost:4000/api/getalluser")
+        setAlluser(response.data.users)
+        console.log(response)
+      } catch (error) {
+        console.log("Error while getall user on dashboard", error)
+      }
+
+    }
+
+    getAllUser()
 
     fetchConversation();
   }, []);
@@ -32,14 +44,11 @@ const Dashboard = () => {
       const response = await axios.get(
         `http://localhost:4000/api/message/${conversationId}`
       );
-      console.log(response)
       setMessages(response.data.getingMessage);
       setConversationUser(user);
       setActiveUser(true);
       setMessageConversationId(conversationId)
 
-      console.log(conversationUser);
-      console.log(messages);
     } catch (error) {
       console.log("error while fetch the user messages", error);
     }
@@ -54,8 +63,6 @@ const Dashboard = () => {
         receiverId: conversationUser.id
       }
       const response = await axios.post("http://localhost:4000/api/message",sendData)
-      console.log(response)
-      console.log(sendData)
       setMessage("")
     } catch (error) {
       console.log("error while send message", error)
@@ -190,7 +197,38 @@ const Dashboard = () => {
           Select your contact persone for conversation
         </div>
       )}
-      <div className="w-[25%]  h-screen"></div>
+      <div className="w-[25%] h-screen px-8 py-12">
+        <div className="text-blue-500 text-lg">People you can message them</div>
+        <div className="bg-white overflow-scroll rounded-md">
+            {allUser.length > 0 ? (
+              allUser.map((user,index)=> (
+                <div
+                  key={index}
+                  className="flex items-center my-8 hover:bg-slate-200 hover:rounded-md p-2 cursor-pointer"
+                  // onClick={() => fetchMessages(conversationId, user)}
+                >
+                  <div className="border border-blue-800 p-2 rounded-[50%]">
+                    <img
+                      src={user.img}
+                      width={40}
+                      height={40}
+                      className="rounded-[50%]"
+                    />
+                  </div>
+                  <div className="ml-2">
+                    <h3 className="text-lg">{user.fullName}</h3>
+                    <p className="text-base font-light">{user.email}</p>
+                  </div>
+                  <hr />
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-lg font-semibold pt-4">
+                No Conversations yet
+              </div>
+            )}
+          </div>
+      </div>
     </div>
   );
 };
