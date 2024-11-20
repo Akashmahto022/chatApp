@@ -242,11 +242,9 @@ app.get("/api/message/:conversationId", async (req, res) => {
       });
     }
     const messages = await Messages.find({ conversationId });
-    console.log(messages);
     const messageUserData = await Promise.all(
       messages.map(async (message) => {
         const user = await User.findById(message.senderId);
-        console.log(user);
         return {
           user: {
             email: user.email,

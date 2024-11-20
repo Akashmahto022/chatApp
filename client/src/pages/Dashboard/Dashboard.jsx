@@ -51,6 +51,7 @@ const Dashboard = () => {
         setConversations(response.data.
           conversationUserData
           );
+        
       } catch (error) {
         console.log("error while fetch the conversations", error);
       }
@@ -61,9 +62,10 @@ const Dashboard = () => {
 
   const fetchMessages= async(conversationId)=>{
     try {
-      const response = await axios.get(`http://localhost:4000/api/conversations/${conversationId}`)
-      console.log(response.data)
-      setMessages(response.data)
+      const response = await axios.get(`http://localhost:4000/api/message/${conversationId}`)
+      console.log(response)
+      setMessages(response.data.data)
+      console.log(message)
     } catch (error) {
       console.log('error while fetch the user messages', error)
     }
@@ -233,3 +235,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
