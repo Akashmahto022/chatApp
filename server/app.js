@@ -161,6 +161,7 @@ app.get("/api/conversations/:userId", async (req, res) => {
         const user = await User.findById(receiverId);
         return {
           user: {
+            id: user._id,
             email: user.email,
             fullName: user.fullName,
           },

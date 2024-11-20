@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Avatar from "../../assets/ganesh.png";
-import Input from "../../components/Input/Input";
 import axios from "axios";
 
 const Dashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const [message, setMessage] = useState("") 
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [conversationUser, setConversationUser] = useState([]);
   const [activeUser, setActiveUser] = useState(false);
+  const [messageconversationId, setMessageConversationId] = useState("")
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -16,6 +17,7 @@ const Dashboard = () => {
         const response = await axios.get(
           `http://localhost:4000/api/conversations/${user.id}`
         );
+        console.log(response)
         setConversations(response.data.conversationUserData);
       } catch (error) {
         console.log("error while fetch the conversations", error);
@@ -30,9 +32,11 @@ const Dashboard = () => {
       const response = await axios.get(
         `http://localhost:4000/api/message/${conversationId}`
       );
+      console.log(response)
       setMessages(response.data.getingMessage);
       setConversationUser(user);
       setActiveUser(true);
+      setMessageConversationId(conversationId)
 
       console.log(conversationUser);
       console.log(messages);
@@ -40,6 +44,23 @@ const Dashboard = () => {
       console.log("error while fetch the user messages", error);
     }
   };
+
+  const sendMessage = async()=>{
+    try {
+      const sendData = {
+        conversationId: messageconversationId, 
+        senderId: user.id,
+        message: message,
+        receiverId: conversationUser.id
+      }
+      const response = await axios.post("http://localhost:4000/api/message",sendData)
+      console.log(response)
+      console.log(sendData)
+      setMessage("")
+    } catch (error) {
+      console.log("error while send message", error)
+    }
+  }
 
   return (
     <div className="w-screen flex ">
@@ -156,8 +177,10 @@ const Dashboard = () => {
               type="text"
               placeholder="Type Your Message here..."
               className="w-full p-2 rounded-lg border-orange-600"
+              value={message}
+              onChange={(e)=>setMessage(e.target.value)}
             />
-            <button className="p-4 bg-green-600 text-white font-semibold rounded-md">
+            <button className={`p-4 text-white font-semibold rounded-md ${message == "" ? "bg-gray-500" :"bg-green-600"}`} disabled={!message.trim()} onClick={()=>sendMessage()}>
               Send
             </button>
           </div>
