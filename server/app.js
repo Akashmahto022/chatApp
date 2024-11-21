@@ -6,14 +6,35 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { Conversation } from "./models/Conversation.model.js";
 import { Messages } from "./models/Messages.model.js";
+import http from "http";
+import { Server } from "socket.io";
+
 
 const app = express();
 const port = 4000;
+const server = http.createServer(app); // Create an HTTP server
+const io = new Server(server); // Attach Socket.IO to the server
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 dbConnection();
+
+
+
+// socket connection
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("message", (data) => {
+      console.log("Message from client:", data);
+      io.emit("message", `Server received: ${data}`);
+  });
+
+  socket.on("disconnect", () => {
+      console.log("A user disconnected:", socket.id);
+  });
+});
 
 // Routes
 app.get("/", (req, res) => {
@@ -299,6 +320,6 @@ app.get("/api/getalluser", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`server is running at http://localhost:${port}`);
 });
