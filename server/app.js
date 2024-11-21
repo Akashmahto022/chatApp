@@ -3,7 +3,7 @@ import dbConnection from "./db/index.js";
 import { User } from "./models/User.model.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
-import cors from 'cors'
+import cors from "cors";
 import { Conversation } from "./models/Conversation.model.js";
 import { Messages } from "./models/Messages.model.js";
 
@@ -12,7 +12,7 @@ const port = 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors())
+app.use(cors());
 dbConnection();
 
 // Routes
@@ -125,6 +125,30 @@ app.post("/api/login", async (req, res, next) => {
     res.json({
       status: 400,
       message: "Error while login the user",
+    });
+  }
+});
+
+app.post("/api/logout", async (req, res) => {
+  try {
+    const {id} = req.body
+    User.findByIdAndUpdate({id},
+      {
+        $unset: {
+          token: 1,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    res.json({ status: 200, message: "Successfully logout" });
+  } catch (error) {
+    console.log();
+    res.json({
+      status: 400,
+      message: "Error while logout the user",
+      Error: error,
     });
   }
 });

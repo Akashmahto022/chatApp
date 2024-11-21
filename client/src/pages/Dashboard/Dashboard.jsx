@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Avatar from "../../assets/ganesh.png";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
@@ -11,17 +12,18 @@ const Dashboard = () => {
   const [activeUser, setActiveUser] = useState(false);
   const [messageconversationId, setMessageConversationId] = useState("");
   const [allUser, setAlluser] = useState([]);
+  const navigate = useNavigate();
 
   const startConversation = async (receiverId) => {
     try {
       const connectionData = { senderId: user.id, receiverId: receiverId };
-      console.log(connectionData)
       const response = await axios.post(
         "http://localhost:4000/api/conversation",
         connectionData
       );
-      console.log(response);
-    } catch (error) {}
+    } catch (error) {
+      console.log("Error while start conversation", error);
+    }
   };
 
   useEffect(() => {
@@ -30,9 +32,7 @@ const Dashboard = () => {
         const response = await axios.get(
           `http://localhost:4000/api/conversations/${user.id}`
         );
-        console.log(response);
         setConversations(response.data.conversationUserData);
-        console.log(conversations);
       } catch (error) {
         console.log("error while fetch the conversations", error);
       }
@@ -85,6 +85,20 @@ const Dashboard = () => {
     }
   };
 
+  const Logout = async () => {
+    const id = user.id;
+    try {
+      const response = await axios.post("http://localhost:4000/api/logout", id);
+      console.log(response);
+      if (response.data.message == "Successfully logout") {
+        localStorage.clear()
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log("Error while logout the user", error);
+    }
+  };
+
   return (
     <div className="w-screen flex ">
       <div className="w-[25%] bg-white h-screen bg-secondary">
@@ -105,7 +119,7 @@ const Dashboard = () => {
         <hr />
         <div className="ml-6">
           <div>Message</div>
-          <div>
+          <div className="overflow-y-scroll h-[470px]">
             {conversations.length >= 0 ? (
               conversations.map(({ user, conversationId }, index) => (
                 <div
@@ -219,15 +233,25 @@ const Dashboard = () => {
           Select your contact persone for conversation
         </div>
       )}
-      <div className="w-[25%] h-screen px-8 py-12">
-        <div className="text-blue-500 text-lg">People you can message them</div>
+      <div className="w-[25%] h-screen pt-6">
+        <button
+          onClick={Logout}
+          className="bg-red-600 text-white font-medium w-20 py-2 rounded-lg hover:bg-red-800 ml-56 mb-10"
+        >
+          Logout
+        </button>
+        <div className="text-blue-500 text-lg text-center">
+          People you can message them
+        </div>
         <div className="bg-white overflow-scroll rounded-md">
           {allUser.length > 0 ? (
             allUser.map((user, index) => (
               <div
                 key={index}
                 className="flex items-center my-8 hover:bg-slate-200 hover:rounded-md p-2 cursor-pointer"
-                onClick={() => startConversation(user._id)}
+                onClick={() => {
+                  startConversation(user._id);
+                }}
               >
                 <div className="border border-blue-800 p-2 rounded-[50%]">
                   <img
