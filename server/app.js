@@ -32,8 +32,8 @@ app.get("/", (req, res) => {
 let users = [];
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
-  socket.on("addUser", userId => {
-    console.log(userId)
+  socket.on("addUser", (userId) => {
+    console.log(userId);
     const isUserExists = users.find((user) => user.userId === userId);
     if (!isUserExists) {
       const user = { userId, socketId: socket.id };
@@ -42,9 +42,27 @@ io.on("connection", (socket) => {
     }
   });
 
-  io.emit("getUser", socket.userId);
+  socket.on(
+    "sendMessage",
+    async({ conversationId, senderId, message, receiverId }) => {
+      const receiver = users.find((user) => user.userId === receiverId);
+      const sender = users.find(user => user.userId === senderId)
+      const user = await User.findById(senderId)
+      if (receiver) {
+        io.to(receiver.socketId).to(socket.id).emit("getMessage", {
+          conversationId,
+          senderId,
+          message,
+          receiverId,
+          user: {id: user._id, fullName: user.fullName, email:user.email}
+        });
+      }
+    }
+  );
 
   socket.on("disconnect", () => {
+    users = users.filter((user) => user.socketId !== socket.id);
+    io.emit("getUsers", users);
     console.log("A user disconnected:", socket.id);
   });
 });

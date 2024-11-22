@@ -16,15 +16,20 @@ const Dashboard = () => {
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
 
+  console.log(messages, "message");
+
   useEffect(() => {
     setSocket(io("http://localhost:4000"));
   }, []);
 
   useEffect(() => {
     socket?.emit("addUser", user?.id);
-    console.log("add user")
-    socket?.on("getUsers", users => {
+    socket?.on("getUsers", (users) => {
       console.log("active users :", users);
+    });
+    socket?.on("getMessage", (data) => {
+      console.log(data);
+      setMessages((prev) => [...prev, {user:data.user, message: data.message}]);
     });
   }, [socket]);
 
@@ -89,6 +94,9 @@ const Dashboard = () => {
         message: message,
         receiverId: conversationUser.id,
       };
+
+      socket?.emit("sendMessage", sendData);
+
       const response = await axios.post(
         "http://localhost:4000/api/message",
         sendData
