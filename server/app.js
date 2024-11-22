@@ -32,12 +32,13 @@ app.get("/", (req, res) => {
 let users = [];
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
-  socket.on("addUser", (userId) => {
+  socket.on("addUser", userId => {
+    console.log(userId)
     const isUserExists = users.find((user) => user.userId === userId);
     if (!isUserExists) {
       const user = { userId, socketId: socket.id };
       users.push(user);
-      io.emit("getUser", users);
+      io.emit("getUsers", users);
     }
   });
 

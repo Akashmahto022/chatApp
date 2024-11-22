@@ -18,12 +18,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     setSocket(io("http://localhost:4000"));
-    console.log("works useeffect") 
   }, []);
 
   useEffect(() => {
     socket?.emit("addUser", user?.id);
-    socket?.on("getUsers", (users) => {
+    console.log("add user")
+    socket?.on("getUsers", users => {
       console.log("active users :", users);
     });
   }, [socket]);
