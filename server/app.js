@@ -6,39 +6,46 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { Conversation } from "./models/Conversation.model.js";
 import { Messages } from "./models/Messages.model.js";
-import http from "http";
+import { createServer } from "node:http";
 import { Server } from "socket.io";
-
 
 const app = express();
 const port = 4000;
-const server = http.createServer(app); // Create an HTTP server
-const io = new Server(server); // Attach Socket.IO to the server
+const server = createServer(app); // Create an HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
+}); // Attach Socket.IO to the server
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 dbConnection();
 
-
-
-// socket connection
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  socket.on("message", (data) => {
-      console.log("Message from client:", data);
-      io.emit("message", `Server received: ${data}`);
-  });
-
-  socket.on("disconnect", () => {
-      console.log("A user disconnected:", socket.id);
-  });
-});
-
 // Routes
 app.get("/", (req, res) => {
   res.send("hello Akash");
+});
+
+// socket connection
+let users = [];
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+  socket.on("addUser", (userId) => {
+    const isUserExists = users.find((user) => user.userId === userId);
+    if (!isUserExists) {
+      const user = { userId, socketId: socket.id };
+      users.push(user);
+      io.emit("getUser", users);
+    }
+  });
+
+  io.emit("getUser", socket.userId);
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
 });
 
 //register user
@@ -152,8 +159,9 @@ app.post("/api/login", async (req, res, next) => {
 
 app.post("/api/logout", async (req, res) => {
   try {
-    const {id} = req.body
-    User.findByIdAndUpdate({id},
+    const { id } = req.body;
+    User.findByIdAndUpdate(
+      { id },
       {
         $unset: {
           token: 1,

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Avatar from "../../assets/ganesh.png";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 const Dashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
@@ -12,7 +13,20 @@ const Dashboard = () => {
   const [activeUser, setActiveUser] = useState(false);
   const [messageconversationId, setMessageConversationId] = useState("");
   const [allUser, setAlluser] = useState([]);
+  const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setSocket(io("http://localhost:4000"));
+    console.log("works useeffect") 
+  }, []);
+
+  useEffect(() => {
+    socket?.emit("addUser", user?.id);
+    socket?.on("getUsers", (users) => {
+      console.log("active users :", users);
+    });
+  }, [socket]);
 
   const startConversation = async (receiverId) => {
     try {
@@ -91,7 +105,7 @@ const Dashboard = () => {
       const response = await axios.post("http://localhost:4000/api/logout", id);
       console.log(response);
       if (response.data.message == "Successfully logout") {
-        localStorage.clear()
+        localStorage.clear();
         navigate("/login");
       }
     } catch (error) {
