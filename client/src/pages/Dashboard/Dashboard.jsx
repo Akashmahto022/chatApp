@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Avatar from "../../assets/ganesh.png";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -15,10 +15,15 @@ const Dashboard = () => {
   const [allUser, setAlluser] = useState([]);
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
-
+  const messagesRef = useRef(null) 
   console.log(messages, "message");
 
-  useEffect(() => {
+
+  useEffect(()=>{
+    messagesRef?.current?.scrollIntoView({behavior: "smooth"})
+  },[messages?.message])
+
+  useEffect(() => { 
     setSocket(io("http://localhost:4000"));
   }, []);
 
@@ -213,16 +218,19 @@ const Dashboard = () => {
             <div className="h-[1000px] px-10 py-14">
               {messages.length > 0 ? (
                 messages.map(({ message, user: { id } = {} }, index) => (
+                  <>
                   <div
                     key={index}
                     className={`max-w-[40%] rounded-b-xl p-4 mb-6 ${
                       id === user?.id
-                        ? "bg-green-600 text-white rounded-tl-xl ml-auto"
-                        : "bg-blue-500 rounded-tr-xl"
+                      ? "bg-green-600 text-white rounded-tl-xl ml-auto"
+                      : "bg-blue-500 rounded-tr-xl"
                     }`}
-                  >
+                    >
                     {message}
                   </div>
+                  <div ref={messagesRef}></div>
+                    </>
                 ))
               ) : (
                 <div className="text-center text-lg font-semibold pt-4">
@@ -265,12 +273,12 @@ const Dashboard = () => {
         <div className="text-blue-500 text-lg text-center">
           People you can message them
         </div>
-        <div className="bg-white overflow-scroll rounded-md">
+        <div className="bg-white rounded-md mt-4 h-[71%] mx-2 overflow-scroll">
           {allUser.length > 0 ? (
             allUser.map((user, index) => (
               <div
                 key={index}
-                className="flex items-center my-8 hover:bg-slate-200 hover:rounded-md p-2 cursor-pointer"
+                className="flex items-center my-8 hover:bg-slate-200 hover:rounded-md p-2 cursor-pointer overflow-y-scroll"
                 onClick={() => {
                   startConversation(user._id);
                 }}
